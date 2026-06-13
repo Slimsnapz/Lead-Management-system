@@ -42,13 +42,13 @@ missing_env = [name for name in required_env if not os.getenv(name)]
 db_config_error = f"Missing required database environment variables: {', '.join(missing_env)}" if missing_env else None
 
 conn_str = (
-    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "DRIVER={ODBC Driver 18 for SQL Server};"
     f"SERVER={os.getenv('DB_SERVER')},1433;"
     f"DATABASE={os.getenv('DB_NAME')};"
     f"UID={os.getenv('DB_UID')};"
     f"PWD={os.getenv('DB_PWD')};"
     "Encrypt=yes;"
-    "TrustServerCertificate=no;"
+    "TrustServerCertificate=yes;"
     "Connection Timeout=8;"
 )
 conn = None
