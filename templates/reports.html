@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container" style="max-width: 100%;">
+    
+    <div style="border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: var(--maroon);">Advanced Data Reports</h2>
+        <p style="color: #666; margin: 5px 0 0 0;">Slice the pipeline data by stage, geography, unit, owner, or time period.</p>
+    </div>
+
+    <div style="background: var(--beige-soft); border: 1px solid rgba(123, 38, 52, 0.16); padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <form action="{{ url_for('reports') }}" method="GET">
+            
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; align-items: flex-end; margin-bottom: 15px;">
+                <div>
+                    <label style="margin-top: 0; font-size: 12px;">Data Source</label>
+                    <select name="table">
+                        <option value="opportunities" {% if selected_table == 'opportunities' %}selected{% endif %}>Opportunities</option>
+                        <option value="leads" {% if selected_table == 'leads' %}selected{% endif %}>Leads</option>
+                        <option value="inquiries" {% if selected_table == 'inquiries' %}selected{% endif %}>Inquiries</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="margin-top: 0; font-size: 12px;">Country</label>
+                    <select name="country">
+                        <option value="All">All Countries</option>
+                        {% for c in country_list %}
+                        <option value="{{ c }}" {% if selected_country == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="margin-top: 0; font-size: 12px;">Business Unit</label>
+                    <select name="bu">
+                        <option value="All">All Units</option>
+                        {% for bu_item in dropdowns.business_units %}
+                        <option value="{{ bu_item }}" {% if selected_bu == bu_item %}selected{% endif %}>{{ bu_item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="margin-top: 0; font-size: 12px;">Owner</label>
+                    <select name="owner">
+                        <option value="All">All Owners</option>
+                        {% for u in user_list %}
+                        <option value="{{ u }}" {% if selected_owner == u %}selected{% endif %}>{{ u }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label style="margin-top: 0; font-size: 12px;">Start Date</label>
+                    <input type="date" name="start_date" value="{{ start_date }}">
+                </div>
+                <div style="flex: 1;">
+                    <label style="margin-top: 0; font-size: 12px;">End Date</label>
+                    <input type="date" name="end_date" value="{{ end_date }}">
+                </div>
+                
+                <div style="display: flex; gap: 10px; flex: 2;">
+                    <button type="submit" style="background: #1565c0; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; flex: 1;">Apply Filters</button>
+                    <a href="{{ url_for('export_csv', table=selected_table, sector=selected_sector, owner=selected_owner, country=selected_country, bu=selected_bu, start_date=start_date, end_date=end_date) }}" style="background: #2e7d32; color: white; text-decoration: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; text-align: center; flex: 1; display: flex; justify-content: center; align-items: center;">
+                        📥 Export CSV
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; font-family: 'Segoe UI', sans-serif; font-size: 13px;">
+        <thead>
+            <tr style="background: #f4f7f6; text-align: left; color: #555;">
+                
+                {% if selected_table == 'inquiries' %}
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Organization</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Contact</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Sector</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Category</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Est. Value</th>
+                
+                {% elif selected_table == 'leads' %}
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Organization</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Sector</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Status</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Owner</th>
+                
+                {% else %}
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Opportunity Name</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Sector</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Stage & Prob.</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Projected Revenue</th>
+                    <th style="padding: 12px; border-bottom: 2px solid #ddd;">Owner</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in dataset %}
+            <tr style="border-bottom: 1px solid #eee;">
+                
+                {% if selected_table == 'inquiries' %}
+                    <td style="padding: 12px; font-weight: bold; color: #333;">{{ d.organization_name }}</td>
+                    <td style="padding: 12px;">{{ d.contact_name }}</td>
+                    <td style="padding: 12px;">{{ d.sector or 'N/A' }}</td>
+                    <td style="padding: 12px;">{{ d.lead_category }}</td>
+                    <td style="padding: 12px; color: #2e7d32; font-weight: bold;">${{ "{:,.2f}".format(d.estimated_opportunity_value or 0) }}</td>
+                
+                {% elif selected_table == 'leads' %}
+                    <td style="padding: 12px; font-weight: bold; color: #333;">
+                        <a href="{{ url_for('lead_detail', id=d.id) }}" style="color: #ff9800; text-decoration: none;">{{ d.organization_name }}</a>
+                    </td>
+                    <td style="padding: 12px;">{{ d.sector or 'N/A' }}</td>
+                    <td style="padding: 12px;">
+                        <span style="background: #fff3e0; color: #e65100; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">{{ d.qualification_status }}</span>
+                    </td>
+                    <td style="padding: 12px; color: #666;">{{ d.lead_owner }}</td>
+
+                {% else %}
+                    <td style="padding: 12px; font-weight: bold; color: #333;">
+                        <a href="{{ url_for('opportunity_detail', id=d.id) }}" style="color: #1565c0; text-decoration: none;">{{ d.opportunity_name }}</a>
+                    </td>
+                    <td style="padding: 12px;">{{ d.sector or 'N/A' }}</td>
+                    <td style="padding: 12px;">
+                        <span style="background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;">{{ d.pipeline_stage }}</span>
+                    </td>
+                    <td style="padding: 12px; font-weight: bold; color: #2e7d32;">${{ "{:,.2f}".format(d.estimated_revenue or 0) }}</td>
+                    <td style="padding: 12px; color: #666;">{{ d.primary_owner }}</td>
+                {% endif %}
+
+            </tr>
+            {% endfor %}
+            {% if not dataset %}
+            <tr><td colspan="5" style="padding: 20px; text-align: center; color: #888; font-style: italic;">No records found for this filter combination.</td></tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

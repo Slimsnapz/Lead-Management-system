@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container" style="max-width: 100%;">
+    <h2 style="color: #1565c0; border-bottom: 2px solid #eee; padding-bottom: 10px;">User Role Management</h2>
+    <p style="color: #666;">Assign roles to registered users. Only "Admin" can approve Governance.</p>
+
+    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr style="background: #f4f7f6; text-align: left;">
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Name</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Email</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Current Role</th>
+                <th style="padding: 12px; border-bottom: 2px solid #ddd;">Assign New Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px; font-weight: bold;">{{ u.full_name }}</td>
+                <td style="padding: 12px;">{{ u.email }}</td>
+                <td style="padding: 12px;">
+                    <span style="background: {% if u.role == 'Pending' %}#ffebee; color: #c62828;{% else %}#e8f5e9; color: #2e7d32;{% endif %} padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                        {{ u.role }}
+                    </span>
+                </td>
+                <td style="padding: 12px;">
+                    <form method="POST" style="display: flex; gap: 10px;">
+                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                        <select name="new_role" required style="padding: 6px;">
+                            <option value="Regular" {% if u.role == 'Regular' %}selected{% endif %}>Regular (Deal Owner)</option>
+                            <option value="Admin" {% if u.role == 'Admin' %}selected{% endif %}>Admin (Executive/Approver)</option>
+                            <option value="Data Manager" {% if u.role == 'Data Manager' %}selected{% endif %}>Data Manager</option>
+                        </select>
+                        <button type="submit" class="btn-green" style="margin: 0; padding: 6px 12px;">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

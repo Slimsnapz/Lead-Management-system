@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container" style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #2196f3; padding-bottom: 10px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1565c0;">Edit Inquiry: {{ inquiry.organization_name }}</h2>
+        <a href="{{ url_for('reports', table='inquiries') }}" style="color: #666; text-decoration: none; font-weight: bold;">Cancel & Return</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('edit_inquiry', id=inquiry.id) }}">
+        
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;"><label>Organization Name</label><input type="text" name="organization" value="{{ inquiry.organization_name }}" required></div>
+            <div style="flex: 1;"><label>Contact Name</label><input type="text" name="contact" value="{{ inquiry.contact_name }}" required></div>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;"><label>Role / Title</label><input type="text" name="role" value="{{ inquiry.role_title or '' }}"></div>
+            <div style="flex: 1;"><label>Email Address</label><input type="email" name="email" value="{{ inquiry.email }}" required></div>
+            <div style="flex: 1;"><label>Phone Number</label><input type="text" name="phone" value="{{ inquiry.phone or '' }}"></div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 15px;">
+            <div style="flex: 1;">
+                <label>Inquiry Source</label>
+                <select name="source" required>
+                    {% for item in dropdowns.sources %}<option value="{{ item }}" {% if inquiry.inquiry_source == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>Lead Category</label>
+                <select name="category" required>
+                    {% for item in dropdowns.lead_categories %}<option value="{{ item }}" {% if inquiry.lead_category == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 15px;">
+            <div style="flex: 1;">
+                <label>Sector</label>
+                <select name="sector" id="sectorSelect">
+                    <option value="" disabled>-- Select Sector --</option>
+                    {% for item in dropdowns.sectors %}<option value="{{ item }}" {% if inquiry.sector == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>Commodity</label>
+                <input type="text" name="commodity" value="{{ inquiry.commodity or '' }}">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 15px;">
+            <div style="flex: 1;">
+                <label>Country</label>
+                <select name="country" id="countrySelect" required>
+                    <option value="{{ inquiry.country }}" selected>{{ inquiry.country }}</option>
+                    {% include 'countries.html' %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>Target Geography (Details)</label>
+                <input type="text" name="geography" value="{{ inquiry.geography }}" required>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 15px; margin-bottom: 25px;">
+            <div style="flex: 1;">
+                <label>Nature of Inquiry</label>
+                <select name="nature" required>
+                    {% for item in dropdowns.nature_of_inquiries %}<option value="{{ item }}" {% if inquiry.nature_of_inquiry == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>Estimated Value ($)</label>
+                <input type="number" name="value" value="{{ inquiry.estimated_opportunity_value }}" step="0.01">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-green" style="width: 100%; font-size: 16px;">💾 Save Inquiry Changes</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#countrySelect').select2();
+        $('form').on('keypress', function(e) {
+            if (e.keyCode === 13 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); return false; }
+        });
+    });
+</script>
+{% endblock %}

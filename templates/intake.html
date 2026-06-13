@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Portfolio Pipeline Inquiry Intake</title>
+</head>
+<body>
+
+<h2>Portfolio Pipeline Intake Form</h2>
+
+<form action="/submit" method="POST">
+
+    <input type="text" name="organization" placeholder="Organization Name" required><br><br>
+    <input type="text" name="contact" placeholder="Contact Name" required><br><br>
+    <input type="text" name="role" placeholder="Role / Title"><br><br>
+    <input type="email" name="email" placeholder="Email" required><br><br>
+    <input type="text" name="phone" placeholder="Phone"><br><br>
+
+    <select name="sector">
+        <option value="Agriculture">Agriculture</option>
+        <option value="Maritime">Maritime</option>
+        <option value="Solid Minerals">Solid Minerals</option>
+        <option value="Energy">Energy</option>
+    </select><br><br>
+
+    <select name="geography">
+        <option value="Nigeria">Nigeria</option>
+        <option value="West Africa">West Africa</option>
+        <option value="Global">Global</option>
+    </select><br><br>
+
+    <select name="nature">
+        <option value="Trade">Trade</option>
+        <option value="Investment">Investment</option>
+        <option value="Advisory">Advisory</option>
+    </select><br><br>
+
+    <button type="submit">Submit</button>
+
+</form>
+
+</body>
+</html>

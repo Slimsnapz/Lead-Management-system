@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - {{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body style="display: grid; place-items: center; min-height: 100vh; padding: 24px;">
+    <main class="form-container" style="max-width: 430px; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px;">
+            <div class="brand-mark">DA</div>
+            <div>
+                <h1 style="margin: 0; font-size: 25px;">{{ app_name }}</h1>
+                <p style="margin: 4px 0 0; color: var(--ash-700);">Request access to the analytics workspace.</p>
+            </div>
+        </div>
+
+        {% if error %}
+        <div style="background: var(--maroon-soft); color: var(--maroon-dark); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-weight: 700;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <label>Full Name</label>
+            <input type="text" name="name" placeholder="Full name" required>
+
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="you@example.com" required>
+
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Create password" required>
+
+            <button type="submit">Register Account</button>
+        </form>
+
+        <p style="margin: 22px 0 0; color: var(--ash-700); font-size: 14px;">
+            Already registered? <a href="{{ url_for('login') }}">Log in</a>
+        </p>
+    </main>
+</body>
+</html>

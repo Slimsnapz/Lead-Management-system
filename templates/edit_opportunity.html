@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container" style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #4caf50; padding-bottom: 10px; margin-bottom: 20px;">
+        <h2 style="margin: 0; color: #1b5e20;">Edit Opportunity: {{ deal.opportunity_name }}</h2>
+        <a href="{{ url_for('opportunity_detail', id=deal.id) }}" style="color: #666; text-decoration: none; font-weight: bold;">Cancel & Return</a>
+    </div>
+
+    <form method="POST" action="{{ url_for('edit_opportunity', id=deal.id) }}">
+        
+        <label>Opportunity Name</label>
+        <input type="text" name="opportunity_name" value="{{ deal.opportunity_name }}" required>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>Target Country / Market</label>
+                <select name="country" id="countrySelectEdit" style="width: 100%;" required>
+                    <option value="{{ deal.country }}" selected>{{ deal.country }}</option>
+                    {% include 'countries.html' %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>Sector</label>
+                <select id="oppSector" name="sector" required>
+                    {% for item in dropdowns.sectors %}<option value="{{ item }}" {% if deal.sector == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px;">Deal Structure</h3>
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>Opportunity Type</label>
+                <select name="type" id="oppTypeSelect" required>
+                    {% for item in dropdowns.nature_of_inquiries %}<option value="{{ item }}" {% if deal.opportunity_type == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            
+            <div style="flex: 1; {% if deal.opportunity_type != 'Trade' %}display: none;{% endif %}" id="oppCommodityWrapper">
+                <label>Commodity</label>
+                <input type="text" id="oppCommodity" name="commodity" value="{{ deal.commodity or '' }}">
+            </div>
+            <div style="flex: 1; {% if deal.opportunity_type != 'Event' %}display: none;{% endif %}" id="oppEventWrapper">
+                <label>Event / Campaign Name</label>
+                <input type="text" id="oppEventName" name="event_name" value="{{ deal.event_name or '' }}">
+            </div>
+
+            <div style="flex: 1;">
+                <label>Revenue Model</label>
+                <select name="revenue_model" required>
+                    <option value="Commission" {% if deal.revenue_model == 'Commission' %}selected{% endif %}>Commission</option>
+                    <option value="Retainer" {% if deal.revenue_model == 'Retainer' %}selected{% endif %}>Retainer</option>
+                    <option value="Success Fee" {% if deal.revenue_model == 'Success Fee' %}selected{% endif %}>Success Fee</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="tradeExecutionWrapper" style="display: none; background: #e8f5e9; padding: 20px; border-left: 4px solid #4caf50; margin-top: 20px; margin-bottom: 20px; border-radius: 6px;">
+            <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 1px solid #c8e6c9; padding-bottom: 5px;">🚢 Trade Logistics & Suppliers</h3>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div style="flex: 1;"><label>Supplier Org Name</label><input type="text" name="supplier_name" value="{{ deal.supplier_name or '' }}"></div>
+                <div style="flex: 1;"><label>Supplier Contact Person</label><input type="text" name="supplier_contact" value="{{ deal.supplier_contact or '' }}"></div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div style="flex: 1;"><label>Supplier Email</label><input type="email" name="supplier_email" value="{{ deal.supplier_email or '' }}"></div>
+                <div style="flex: 1;"><label>Supplier Phone</label><input type="text" name="supplier_phone" value="{{ deal.supplier_phone or '' }}"></div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div style="flex: 1;">
+                    <label>Origin Country</label>
+                    <select name="trade_origin" id="tradeOriginSelectEdit" style="width: 100%;">
+                        {% if deal.trade_origin %}
+                            <option value="{{ deal.trade_origin }}" selected>{{ deal.trade_origin }}</option>
+                        {% else %}
+                            <option value="" disabled selected>-- Select Origin --</option>
+                        {% endif %}
+                        {% include 'countries.html' %}
+                    </select>
+                </div>
+                <div style="flex: 1;"><label>Volume</label><input type="text" name="trade_volume" placeholder="e.g. 500 MT" value="{{ deal.trade_volume or '' }}"></div>
+            </div>
+
+            <div style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label>Execution Stage</label>
+                    <select name="trade_stage">
+                        <option value="" disabled>-- Select Phase --</option>
+                        {% for item in dropdowns.trade_stages %}
+                        <option value="{{ item }}" {% if deal.trade_stage == item %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="flex: 1;"><label>ETD (Departure)</label><input type="date" name="etd" value="{{ (deal.etd|string)[:10] if deal.etd else '' }}"></div>
+                <div style="flex: 1;"><label>ETA (Arrival)</label><input type="date" name="eta" value="{{ (deal.eta|string)[:10] if deal.eta else '' }}"></div>
+            </div>
+        </div>
+
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px;">Financial Forecast</h3>
+        <label>Estimated Deal Value (Total Transaction Size)</label>
+        <input type="number" name="deal_value" value="{{ deal.estimated_deal_value }}" step="0.01" required>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;"><label>Projected Revenue</label><input type="number" name="revenue" value="{{ deal.estimated_revenue }}" step="0.01" required></div>
+            <div style="flex: 1;"><label>Estimated Delivery Cost</label><input type="number" name="cost" value="{{ deal.estimated_cost }}" step="0.01" required></div>
+        </div>
+
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px;">Execution & Risk</h3>
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;"><label>Expected Close Date</label><input type="date" name="close_date" value="{{ (deal.expected_close_date|string)[:10] if deal.expected_close_date else '' }}" required></div>
+            <div style="flex: 2;"><label>Supporting Teams</label><input type="text" name="support" value="{{ deal.supporting_teams or '' }}"></div>
+        </div>
+
+        <label>Risk Summary</label>
+        <textarea name="risk_summary" rows="3">{{ deal.risk_summary or '' }}</textarea>
+
+        <button type="submit" class="btn-green" style="width: 100%; font-size: 16px;">💾 Save Deal Changes</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialize ALL searchable dropdowns
+        $('#countrySelectEdit').select2();
+        $('#tradeOriginSelectEdit').select2();
+        
+        // Prevent Enter Key Submit
+        $('form').on('keypress', function(e) {
+            if (e.keyCode === 13 && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); return false; }
+        });
+
+        // Toggle Fields
+        function toggleFields() {
+            var val = document.getElementById("oppTypeSelect").value;
+            document.getElementById("oppCommodityWrapper").style.display = (val === "Trade") ? "block" : "none";
+            document.getElementById("oppEventWrapper").style.display = (val === "Event") ? "block" : "none";
+            document.getElementById("tradeExecutionWrapper").style.display = (val === "Trade") ? "block" : "none";
+        }
+        
+        document.getElementById("oppTypeSelect").addEventListener("change", toggleFields);
+        toggleFields(); // Run on load to show boxes if already Trade
+    });
+</script>
+{% endblock %}

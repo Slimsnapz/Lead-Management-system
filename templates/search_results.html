@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container" style="max-width: 100%;">
+    <h2 style="margin-bottom: 5px;">Search Results</h2>
+    <p style="color: #666; margin-top: 0;">Found results for: <strong>"{{ query }}"</strong></p>
+
+    <h3 style="color: #1565c0; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 30px;">Opportunities</h3>
+    {% if opps %}
+    <ul style="list-style: none; padding: 0;">
+        {% for o in opps %}
+        <li style="background: #fafafa; padding: 15px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>{{ o.opportunity_name }}</strong><br>
+                <span style="font-size: 12px; color: #666;">Owner: {{ o.primary_owner }} | Stage: {{ o.pipeline_stage }}</span>
+            </div>
+            <a href="{{ url_for('opportunity_detail', id=o.id) }}" style="background: #2e7d32; color: white; text-decoration: none; padding: 6px 12px; border-radius: 4px; font-size: 13px;">View Deal</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p style="font-style: italic; color: #888;">No opportunities matched your search.</p>
+    {% endif %}
+
+    <h3 style="color: #ff9800; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 40px;">Organizations (Inquiries)</h3>
+    {% if inquiries %}
+    <ul style="list-style: none; padding: 0;">
+        {% for i in inquiries %}
+        <li style="background: #fafafa; padding: 15px; border-radius: 6px; border: 1px solid #eee; margin-bottom: 10px;">
+            <strong>{{ i.organization_name }}</strong> ({{ i.contact_name }})<br>
+            <span style="font-size: 12px; color: #666;">Sector: {{ i.sector or 'N/A' }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p style="font-style: italic; color: #888;">No organizations matched your search.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

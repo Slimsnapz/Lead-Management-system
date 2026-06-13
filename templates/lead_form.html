@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Qualify New Lead</h2>
+    <p style="color: #666; margin-bottom: 20px;">Convert a raw inquiry into a managed lead.</p>
+
+    {% if error %}
+    <div style="background: #ffebee; color: #c62828; padding: 15px; border-radius: 6px; border: 1px solid #ef9a9a; margin-bottom: 20px; font-weight: bold;">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('lead') }}">
+        
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border: 1px solid #bbdefb; margin-bottom: 20px;">
+            <label style="color: #1565c0; font-weight: bold; margin-top: 0;">Select Existing Inquiry</label>
+            <select id="inquirySelect" name="inquiry_id" style="width: 100%;">
+                <option value="">-- Search by Name or ID --</option>
+                {% for i in open_inquiries %}
+                <option value="{{ i.id }}" data-value="{{ i.estimated_opportunity_value }}" data-sector="{{ i.sector }}" data-commodity="{{ i.commodity }}">{{ i.inquiry_code }} | {{ i.organization_name }} ({{ i.contact_name }})</option>
+                {% endfor %}
+            </select>
+            <p style="text-align: center; margin: 10px 0; color: #666; font-size: 12px; font-weight: bold;">- OR -</p>
+            <div id="newInquiryFields" style="border-top: 1px dashed #ccc; padding-top: 10px;">
+                <label style="margin-top: 0;">Direct Entry (If no inquiry exists)</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" name="new_org" placeholder="Organization Name" style="flex: 1;">
+                    <input type="text" name="new_contact" placeholder="Contact Name" style="flex: 1;">
+                </div>
+                <input type="email" name="new_email" placeholder="Email" style="width: 100%;">
+            </div>
+        </div>
+
+        <h3 style="border-bottom: 2px solid #4caf50; padding-bottom: 5px; color: #2e7d32;">Ownership & Class</h3>
+
+        <label>Country</label>
+        <select name="country" id="countrySelect3" required>
+            {% include 'countries.html' %}
+        </select>
+
+        
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>Sector</label>
+                <select id="sectorInput" name="sector" required>
+                    <option value="" disabled selected>-- Select Sector --</option>
+                    {% for item in dropdowns.sectors %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1; display: none;" id="leadCommodityWrapper">
+                <label>Commodity (If Trade)</label>
+                <input type="text" id="commodityInput" name="commodity" placeholder="e.g. Cashew">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>Lead Owner</label>
+                <input type="text" name="lead_owner" value="{{ session.get('name') }}" required>
+            </div>
+            <div style="flex: 1;">
+                <label>Business Unit</label>
+                <select name="business_unit" id="buSelect" required>
+                    <option value="" disabled selected>-- Select BU --</option>
+                    {% for item in dropdowns.business_units %}
+                    <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="display: none; background: var(--beige-soft); padding: 15px; border-left: 4px solid var(--maroon); margin-top: 15px; border-radius: 8px;" id="eventWrapper">
+            <label style="color: var(--maroon); margin-top: 0;">Event / Campaign Name</label>
+            <input type="text" id="eventNameInput" name="event_name" placeholder="e.g. Agri-Tech Summit 2026">
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>Lead Type</label>
+                <select name="lead_type" required>
+                    <option value="" disabled selected>-- Select Lead Type --</option>
+                    {% for item in dropdowns.lead_types %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>Executive Sponsor</label>
+                <select name="executive_sponsor" required>
+                    <option value="" disabled selected>-- Select Executive --</option>
+                    {% for item in dropdowns.executives %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px;">
+            <h3 style="margin: 0;">Scoring Matrix (1-5)</h3>
+            <div style="background: #e8f5e9; border: 2px solid #4caf50; padding: 5px 15px; border-radius: 20px; text-align: center;">
+                <span style="font-size: 12px; color: #666; font-weight: bold;">Total Lead Score</span><br>
+                <strong id="liveScoreDisplay" style="font-size: 22px; color: #2e7d32;">20 / 25</strong>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 15px; margin-top: 15px;">
+            <div style="flex: 1;">
+                <label>Priority</label>
+                <select name="priority" required><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select>
+            </div>
+            <div style="flex: 1;">
+                <label>Initial Risk Level</label>
+                <select name="risk_level" required><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select>
+            </div>
+        </div>
+
+        <div style="background: #fafafa; padding: 15px; border-radius: 6px; border: 1px solid #eee;">
+            <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+                <div style="flex: 1;"><label>Financial</label><select name="score_financial" class="score-input" required><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div>
+                <div style="flex: 1;"><label>Strategic</label><select name="score_strategic" class="score-input" required><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div>
+                <div style="flex: 1;"><label>Urgency</label><select name="score_urgency" class="score-input" required><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <div style="flex: 1;"><label>Relationship</label><select name="score_relationship" class="score-input" required><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div>
+                <div style="flex: 1;"><label>Geographic Fit</label><select name="score_geographic" class="score-input" required><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div>
+            </div>
+        </div>
+
+        <h3 style="border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 25px;">BANT Qualification</h3>
+        <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+            <label style="display: flex; align-items: center; gap: 5px; margin-top: 0;"><input type="checkbox" name="budget_confirmed" value="1"> Budget?</label>
+            <label style="display: flex; align-items: center; gap: 5px; margin-top: 0;"><input type="checkbox" name="decision_maker" value="1"> Decision Maker?</label>
+            <label style="display: flex; align-items: center; gap: 5px; margin-top: 0;"><input type="checkbox" name="timeline_defined" value="1"> Timeline?</label>
+        </div>
+
+        <label>Estimated Value (USD)</label>
+        <input type="number" id="estValue" name="estimated_value" placeholder="0.00" step="0.01">
+
+        <label>Qualification Status</label>
+        <select name="qualification_status" required style="background-color: #f1f8e9; font-weight: bold;">
+            <option value="New">New</option><option value="Qualified" selected>Qualified (Promote to Opportunity)</option><option value="Nurture">Nurture</option><option value="Disqualified">Disqualified</option>
+        </select>
+        <input type="text" name="disqualification_reason" placeholder="Reason (if Disqualified)">
+
+        <div style="display: flex; gap: 15px; margin-top: 10px;">
+            <div style="flex: 1;"><label>Last Contact Date</label><input type="date" name="last_contact_date"></div>
+            <div style="flex: 1;"><label>Next Action Date</label><input type="date" name="next_action_date"></div>
+        </div>
+        
+        <button type="submit" class="btn-green">Save Lead</button>
+    </form>
+</div>
+
+<script>
+$(document).ready(function() {
+    // 1. Initialize Searchable Dropdowns
+    $('#inquirySelect').select2();
+    $('#countrySelect3').select2();
+
+    // 2. Auto-fill Lead data when an Inquiry is selected
+    $('#inquirySelect').on('select2:select', function (e) {
+        var selectedOption = $(this).find(':selected');
+        $('#estValue').val(selectedOption.data('value') || 0);
+        $('#sectorInput').val(selectedOption.data('sector') || '');
+        $('#commodityInput').val(selectedOption.data('commodity') || '');
+    });
+
+    // 3. Dynamic Business Unit Logic (Trade vs Portfolio Events)
+    $('#buSelect').on('change', function() {
+        var val = $(this).val();
+        
+        // Show Event Name if Portfolio Events
+        if (val === 'Portfolio Events') {
+            $('#eventWrapper').show();
+        } else {
+            $('#eventWrapper').hide();
+            $('#eventNameInput').val(''); 
+        }
+
+        // Show Commodity if Trade
+        if (val === 'Trade') {
+            $('#leadCommodityWrapper').show();
+        } else {
+            $('#leadCommodityWrapper').hide();
+            $('#commodityInput').val('');
+        }
+    });
+
+    // 4. Live Lead Scoring Matrix
+    function updateLeadScore() {
+        var total = 0;
+        $('.score-input').each(function() { total += parseInt($(this).val()) || 0; });
+        var display = $('#liveScoreDisplay');
+        display.text(total + ' / 25');
+        
+        if(total >= 20) { display.css('color', '#2e7d32'); } 
+        else if(total >= 14) { display.css('color', '#f57f17'); } 
+        else { display.css('color', '#c62828'); }
+    }
+    
+    $('.score-input').on('change', updateLeadScore);
+    updateLeadScore();
+});
+
+// PREVENT ACCIDENTAL ENTER-KEY SUBMISSIONS
+    $('form').on('keypress', function(e) {
+        // If they press Enter (Key 13) AND they are not inside a multi-line Textarea
+        if (e.keyCode === 13 && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+{% endblock %}

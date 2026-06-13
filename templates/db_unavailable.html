@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Unavailable - {{ app_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body style="display: grid; place-items: center; min-height: 100vh; padding: 24px;">
+    <main class="form-container" style="max-width: 720px; width: 100%;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+            <div class="brand-mark">DA</div>
+            <div>
+                <h1 style="margin: 0;">Database connection blocked</h1>
+                <p style="margin: 4px 0 0; color: var(--ash-700);">The app is running, but Azure SQL refused the connection.</p>
+            </div>
+        </div>
+
+        <div style="background: var(--maroon-soft); color: var(--maroon-dark); padding: 14px; border-radius: 8px; margin-bottom: 18px; font-weight: 700;">
+            {{ error }}
+        </div>
+
+        <p style="color: var(--ash-700); line-height: 1.6;">
+            For Azure SQL error 40615, add your current public IP address to the SQL server firewall, then refresh this page after a few minutes.
+        </p>
+
+        <div style="background: var(--beige-soft); border: 1px solid rgba(123, 38, 52, 0.16); border-radius: 8px; padding: 16px;">
+            <strong>Azure Portal path</strong>
+            <p style="margin: 8px 0 0; color: var(--ash-700);">
+                Azure Portal > SQL servers > your server > Networking > Firewall rules > Add your client IPv4 address > Save.
+            </p>
+        </div>
+    </main>
+</body>
+</html>

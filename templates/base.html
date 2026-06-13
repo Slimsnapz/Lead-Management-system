@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-mark">DA</div>
+            <div>
+                <h2>{{ app_name }}</h2>
+                <p>Analytics-grade opportunity intelligence</p>
+            </div>
+        </div>
+
+        <form class="search-container" action="{{ url_for('search') }}" method="GET">
+            <input type="text" name="q" placeholder="Search pipeline, org, contact..." required>
+        </form>
+
+        <nav class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('inquiry') }}">New Inquiry</a>
+            <a href="{{ url_for('lead') }}">New Lead</a>
+            <a href="{{ url_for('opportunity') }}">New Opportunity</a>
+            <a href="{{ url_for('reports') }}">Reports & Export</a>
+            <a class="nav-alert" href="{{ url_for('escalations') }}">Action Required</a>
+
+            {% if session.get('role') == 'Data Manager' %}
+            <a class="nav-admin" href="{{ url_for('manage_users') }}">Manage Users</a>
+            {% endif %}
+        </nav>
+
+        <div class="user-panel">
+            <span>Signed in as</span>
+            <strong>{{ session.get('name') }}</strong>
+            <em>{{ session.get('role') }}</em>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
